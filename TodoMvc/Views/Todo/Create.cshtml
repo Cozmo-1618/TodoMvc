@@ -1,0 +1,26 @@
+﻿@model TodoMvc.Models.TodoItem
+
+<h1>Create Todo Item</h1>
+
+<form asp-action="Create" method="post">
+    <div>
+        <label asp-for="Title"></label>
+        <input asp-for="Title" />
+        <span asp-validation-for="Title"></span>
+    </div>
+
+    <div>
+        <label asp-for="IsComplete"></label>
+        <input asp-for="IsComplete" type="checkbox" />
+    </div>
+    
+    <input type="submit" value="Create" />
+    <!-- <input name="Title" type="text" id="title" placeholder="Enter title" /> -->
+
+    <!-- <select name="IsComplete" id="isComplete">
+        <option value="false">Not Complete</option>
+        <option value="true">Complete</option>
+    </select> -->
+
+
+</form>
