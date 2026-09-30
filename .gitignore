@@ -1,5 +1,36 @@
-﻿.vs/
+﻿# Visual Studio / build artifacts
+.vs/
 bin/
 obj/
 *.user
 *.suo
+
+# Rider / VS Code (harmless to include even if unused)
+.idea/
+.vscode/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+
+# EF Core - local SQLite dev database (never commit real data)
+*.db
+*.db-shm
+*.db-wal
+
+# User-specific / secrets (never commit real secrets)
+appsettings.Development.json
+secrets.json
+*.pfx
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+
+# macOS/Windows OS clutter
+.DS_Store
+Thumbs.db
