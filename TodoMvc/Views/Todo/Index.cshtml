@@ -9,6 +9,7 @@
             <th>Title</th>
             <th>Is Complete</th>
             <th>Created At</th>
+            <th>Due Date</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -19,6 +20,7 @@
                 <td>@item.Title</td>
                 <td>@item.IsComplete</td>
                 <td>@item.CreatedAt</td>
+                <td>@item.DueDate?.ToShortDateString()</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                     <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline">

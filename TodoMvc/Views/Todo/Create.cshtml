@@ -10,6 +10,12 @@
     </div>
 
     <div>
+        <label asp-for="DueDate"></label>
+        <input asp-for="DueDate" type="date" />
+        <span asp-validation-for="DueDate"></span>
+    </div>
+
+    <div>
         <label asp-for="IsComplete"></label>
         <input asp-for="IsComplete" type="checkbox" />
         <!-- <input type="checkbox" name="IsComplete" value="true" id="IsComplete" />

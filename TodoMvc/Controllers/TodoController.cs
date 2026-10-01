@@ -101,6 +101,7 @@ namespace TodoMvc.Controllers
             {
                 // _context.Update(item);
                 existingItem.Title = item.Title;
+                existingItem.DueDate = item.DueDate;
                 existingItem.IsComplete = item.IsComplete;
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
