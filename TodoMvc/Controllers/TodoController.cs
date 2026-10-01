@@ -26,12 +26,12 @@ namespace TodoMvc.Controllers
         }
 
         [HttpPost][ValidateAntiForgeryToken] 
-        public async Task<IActionResult> Create(TodoItem item) 
+        public async Task<IActionResult> Create(TodoItem item) //async on the method says "I'm allowed to pause inside this method."
         { 
             if (ModelState.IsValid)//checks any validation rules on your model
             { 
                 _context.TodoItems.Add(item); 
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync(); //await says "pause here until this slow thing finishes, and free the thread to serve other users in the meantime."
                 return RedirectToAction(nameof(Index)); //after a successful POST, you redirect rather than directly returning a view. This is the Post-Redirect-Get pattern: it stops the browser from resubmitting the form if the user hits refresh.
             } 
             return View(item); 
@@ -41,6 +41,14 @@ namespace TodoMvc.Controllers
          async/await let that thread go do other work (serve a different user's request) while waiting for the database to respond, 
         then come back and finish this one when the data arrives. 
         Task<T> is .NET's representation of "a value of type T that will exist eventually, not immediately."
+
+        Task<IActionResult> is what the method hands back to ASP.NET while it's paused. When the method reaches return, 
+        the task completes and the IActionResult comes out of it.
+
+        The GET method isn't async because it does nothing slow. It just returns a view. 
+        The POST method talks to a database, which is slow compared to CPU work, so it benefits from async. 
+        Without it, the thread would sit idle waiting for the database. 
+        With it, that thread can handle other requests, so your app handles more users with the same resources.
          */
 
         /*public IActionResult Index()
@@ -51,6 +59,54 @@ namespace TodoMvc.Controllers
             var items = _context.TodoItems.OrderByDescending(t => t.CreatedAt).ToList();
             return View(items);
         }*/
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var item = await _context.TodoItems.FindAsync(id); //FindAsync is a shortcut for "SELECT * FROM TodoItems WHERE Id = @id"
+            if (item == null)
+            {
+                return NotFound();
+            }
+            _context.TodoItems.Remove(item);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var item = await _context.TodoItems.FindAsync(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+            return View(item);
+        }
+
+        [HttpPost][ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, TodoItem item)
+        {
+            if (id != item.Id) return BadRequest();
+
+            var existingItem = await _context.TodoItems.FindAsync(id);
+
+            if (existingItem == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                // _context.Update(item);
+                existingItem.Title = item.Title;
+                existingItem.IsComplete = item.IsComplete;
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(item);
+        }
 
     }
 }
