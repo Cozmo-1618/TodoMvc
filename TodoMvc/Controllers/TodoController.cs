@@ -2,20 +2,21 @@
 using Microsoft.EntityFrameworkCore;
 using TodoMvc.Data;
 using TodoMvc.Models;
+using TodoMvc.Repositories;
 
 namespace TodoMvc.Controllers
 {
     public class TodoController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly ITodoRepository _repository;
         //public TodoController(AppDbContext context) => _context = context;
-        public TodoController(AppDbContext context)
+        public TodoController(ITodoRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
         public async Task<IActionResult> Index() 
         { 
-            var items = await _context.TodoItems.OrderByDescending(t => t.CreatedAt).ToListAsync(); 
+            var items = await _repository.GetAllAsync();
             return View(items);
         }
 
@@ -30,8 +31,7 @@ namespace TodoMvc.Controllers
         { 
             if (ModelState.IsValid)//checks any validation rules on your model
             { 
-                _context.TodoItems.Add(item); 
-                await _context.SaveChangesAsync(); //await says "pause here until this slow thing finishes, and free the thread to serve other users in the meantime."
+                await _repository.AddAsync(item);
                 return RedirectToAction(nameof(Index)); //after a successful POST, you redirect rather than directly returning a view. This is the Post-Redirect-Get pattern: it stops the browser from resubmitting the form if the user hits refresh.
             } 
             return View(item); 
@@ -64,20 +64,19 @@ namespace TodoMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var item = await _context.TodoItems.FindAsync(id); //FindAsync is a shortcut for "SELECT * FROM TodoItems WHERE Id = @id"
+            var item = await _repository.GetByIdAsync(id);
             if (item == null)
             {
                 return NotFound();
             }
-            _context.TodoItems.Remove(item);
-            await _context.SaveChangesAsync();
+            await _repository.DeleteAsync(id);    
             return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var item = await _context.TodoItems.FindAsync(id);
+            var item = await _repository.GetByIdAsync(id);
             if (item == null)
             {
                 return NotFound();
@@ -90,7 +89,7 @@ namespace TodoMvc.Controllers
         {
             if (id != item.Id) return BadRequest();
 
-            var existingItem = await _context.TodoItems.FindAsync(id);
+            var existingItem = await _repository.GetByIdAsync(id);
 
             if (existingItem == null)
             {
@@ -103,7 +102,7 @@ namespace TodoMvc.Controllers
                 existingItem.Title = item.Title;
                 existingItem.DueDate = item.DueDate;
                 existingItem.IsComplete = item.IsComplete;
-                await _context.SaveChangesAsync();
+                await _repository.UpdateAsync(existingItem);
                 return RedirectToAction(nameof(Index));
             }
             return View(item);
